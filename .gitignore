@@ -1,0 +1,8 @@
+pages/Calculadora/
+pages/derivada_simbolica/
+pages/derivada_numerica/
+pages/integral_simbolica/
+__pycache__/
+pages/integral_numerica/
+.venv/
+.DS_Store
