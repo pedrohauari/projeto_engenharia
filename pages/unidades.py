@@ -4,7 +4,7 @@ from sympy import degree
 
 # 1. Inicializa o Registro de Unidades do Pint
 ureg = UnitRegistry()
-q = ureg.Quantity # Atalho para criar quantidades
+
 
 # Configuração da página
 st.set_page_config(page_title="Conversor Pró - Pint", page_icon="📏", layout="centered")
