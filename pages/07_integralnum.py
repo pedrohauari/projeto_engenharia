@@ -27,7 +27,7 @@ with st.sidebar:
             st.rerun()
 
 # 3) INPUT DO USUÁRIO
-raw_input = st.text_input("Digite a expressão(ex: sin(x) + tan(y) ):", value = "sin(x) + tan(y)")
+raw_input = st.text_input("Digite a expressão(ex: e^x**2 ):", value = "e**x**2")
 if not raw_input.strip():
     st.info("Aguardando uma expressão...")
     st.stop()

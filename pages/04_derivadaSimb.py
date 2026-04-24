@@ -61,7 +61,7 @@ def calculadora():
     
     modo = st.sidebar.radio("Modo de Cálculo:", ["Explícita", "Implícita", "Taxas Relacionadas"])
     
-    entrada_raw = st.sidebar.text_area("Digite a função/equação:", "x**2 + y**2 = 25", help="Use '*' para multiplicar e '^' para potência.")
+    entrada_raw = st.sidebar.text_area("Digite a função/equação:", "x^3 + x^2 + x", help="Use '*' para multiplicar e '^' para potência.")
     entrada_usuario = entrada_raw.replace('^', '**') 
 
     # Lógica de seleção de variáveis baseada no modo
@@ -89,7 +89,7 @@ def calculadora():
 
     # --- PROCESSAMENTO ---
     try:
-        # Limpeza da equação
+        # Limpeza da equação => f(x) = g(x)  vira f(x) - g(x) = 0 para o sympy fazer as contas
         if "=" in entrada_usuario:
             lado_esquerdo, lado_direito = entrada_usuario.split("=")
             texto_para_sympy = f"({lado_esquerdo}) - ({lado_direito})"
