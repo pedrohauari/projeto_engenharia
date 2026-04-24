@@ -76,8 +76,8 @@ try:
     col1, col2 = st.columns(2)
     with col1:
         st.write(f"**Limites de integração para {var_integracao}:**")
-        lim_inf, expr_inf = st.number_input("Limite Inferior (a):", "0")
-        lim_sup, expr_sup = st.number_input("Limite Superior (b):", "1")
+        lim_inf, expr_inf = st.number_input("Limite Inferior (a):", value= 0)
+        lim_sup, expr_sup = st.number_input("Limite Superior (b):", value = 1 )
     if lim_inf is not None and lim_sup is not None:
         st.markdown(f"### Calculando a integral:")
         st.latex(rf"\int_{{{sp.latex(expr_inf)}}}^{{{sp.latex(expr_sup)}}} f(x) \, dx")
