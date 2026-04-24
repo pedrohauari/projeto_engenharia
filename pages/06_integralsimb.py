@@ -44,15 +44,19 @@ st.divider()
 st.title("Calculadora de Integrais Definidas")
 st.caption("Aqui você pode calcular integrais definidas usando integração numérica para funções que não possuem uma solução analítica simples.")
 
-# 1. Inputs
-raw_input_def = st.text_input("Função (use 'x'):", value="sin(x)", key="func_def")
-lower_limit, expr_lower = st.number_input("Limite inferior:", value= 0)
-upper_limit, expr_upper = st.number_input("Limite superior:", value= 1)
+# 1. Inputs - Ajuste na lógica de atribuição
+nada = {}
+lower_limit = st.number_input("Limite inferior:", value=0.0) # Adicionei .0 para garantir que seja float
+expr_lower = sp.Number(lower_limit) # Criamos a versão simbólica para o sp.latex usar depois
+
+upper_limit = st.number_input("Limite superior:", value=1.0)
+expr_upper = sp.Number(upper_limit)
 
 # 2. Lógica Principal
 if lower_limit is not None and upper_limit is not None:
     try:
         # Processa a função principal
+        # Nota: certifique-se que 'meus_simbolos' e '_clash' foram definidos antes no seu código total
         func_def = sp.sympify(raw_input_def, locals={**meus_simbolos, **_clash})
         
         # PREPARA PARA O CALCULO 
@@ -63,6 +67,7 @@ if lower_limit is not None and upper_limit is not None:
 
         # 3. EXIBIÇÃO DA INTEGRAL
         st.write("### Resultado:")
+        # Agora o sp.latex funciona porque expr_lower e expr_upper são objetos do SymPy
         st.latex(rf"\int_{{{sp.latex(expr_lower)}}}^{{{sp.latex(expr_upper)}}} {sp.latex(func_def)} \, dx \approx {resultado:.4f}")
 
         # 4. EXIBIÇÃO DO GRÁFICO (Agora protegido dentro do Try!)
