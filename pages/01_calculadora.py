@@ -27,7 +27,7 @@ with st.sidebar:
             st.rerun()
 
 # --- 3. INPUT DA EQUAÇÃO ---
-raw_input = st.text_input("Digite a expressão (ex: sin(x) + exp(x)): ", value="sin(x) + exp(x)")
+raw_input = st.text_input("Digite a expressão (ex: sin(x) + exp(x)): ", value="x**2")
 
 if not raw_input.strip():
     st.info("Aguardando uma expressão...")

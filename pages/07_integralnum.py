@@ -6,6 +6,7 @@ from scipy.integrate import quad
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 st.set_page_config("Calculadora de Integrais Definidas", layout="wide", page_icon="🧮")
 # 1) Inicializar o histórico
 if 'historico' not in st.session_state:
@@ -75,8 +76,11 @@ try:
     col1, col2 = st.columns(2)
     with col1:
         st.write(f"**Limites de integração para {var_integracao}:**")
-        lim_inf = st.number_input("Limite Inferior (a):", value=0.0, format="%.6f")
-        lim_sup = st.number_input("Limite Superior (b):", value=1.0, format="%.6f")
+        lim_inf, expr_inf = st.number_input("Limite Inferior (a):", "0")
+        lim_sup, expr_sup = st.number_input("Limite Superior (b):", "1")
+    if lim_inf is not None and lim_sup is not None:
+        st.markdown(f"### Calculando a integral:")
+        st.latex(rf"\int_{{{sp.latex(expr_inf)}}}^{{{sp.latex(expr_sup)}}} f(x) \, dx")
 
     # Se sobrarem variáveis (ex: integrar x, mas tem um 'y' constante)
     outras_vars = [v for v in variaveis if v != var_integracao]
@@ -100,7 +104,7 @@ try:
     st.markdown("### 📖 Representação Matemática")
     
     # Criamos o símbolo da integral para o LaTeX: \int_{a}^{b} f(x) dx
-    integral_visual = sp.Integral(expr, (var_integracao, lim_inf, lim_sup))
+    integral_visual = sp.Integral(expr, (var_integracao, expr_inf, expr_sup))
     st.latex(sp.latex(integral_visual))
 
     # --- 🚀 BOTÃO DE CÁLCULO ---
@@ -120,7 +124,7 @@ try:
             
             # 4. Formatação para o Histórico
             texto_resultado = (
-                f"**∫ f({var_integracao}) d{var_integracao}** de {lim_inf} a {lim_sup}\n\n"
+                f"**∫ f({var_integracao}) d{var_integracao}** de {expr_inf} a {expr_sup}\n\n"
                 f"Função: `{expr}`\n\n"
                 f"Valores das constantes: `{valores_subs}`\n\n"
                 f"**Resultado: {resultado:.8f}** \n\n"

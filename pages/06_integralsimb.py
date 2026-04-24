@@ -6,14 +6,17 @@ import scipy as sc
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 
+
 st.set_page_config(page_title="Calculadora de Integrais Simbólicas", layout="wide" , page_icon=":abacus:")
 st.title("Calculadora de Integrais Indefinidas")
+# Casos Especiais 
 funcoes_especiais = {
     sp.erf: "Função de Erro (comum em probabilidade e calor)",
     sp.Si: "Seno Integral (comum em processamento de sinais)",
     sp.Ci: "Cosseno Integral",
     sp.expint: "Integral Exponencial"
 }
+# Para ajudar o usuário
 meus_simbolos = {"e": sp.E, "pi": sp.pi, "ln": sp.log,}
 raw_input = st.text_input("Digite a função a ser integrada (use 'x' como variável):", value="cos(x)", key="func_indef") 
 
@@ -40,36 +43,60 @@ except (sp.SympifyError, ValueError) as e:
 st.divider()
 st.title("Calculadora de Integrais Definidas")
 st.caption("Aqui você pode calcular integrais definidas usando integração numérica para funções que não possuem uma solução analítica simples.")
-raw_input_def = st.text_input(f"Digite a função a ser integrada (use 'x' como variável):", value=raw_input, key="func_def")
-lower_limit = st.text_input("Digite o limite inferior de integração:", value="0")
-upper_limit = st.text_input("Digite o limite superior de integração:", value="1")
-try:
-    func_def = sp.sympify(raw_input_def, locals={**meus_simbolos, **_clash})
-    lower = float(sp.sympify(lower_limit, locals={**meus_simbolos, **_clash}))
-    upper = float(sp.sympify(upper_limit, locals={**meus_simbolos, **_clash}))
-    resultado, erro = quad(lambda x: sp.lambdify(sp.symbols('x'), func_def)(x), lower, upper)
-    st.write(f"Integral definida de `{func_def}` de `{lower}` a `{upper}` é aproximadamente:")
-    st.latex(f"\\int_{{{lower}}}^{{{upper}}} {sp.latex(func_def)} \\, dx \\approx {resultado:.4f}")
 
-except (sp.SympifyError, ValueError) as e:
-    st.error(f"Erro ao processar a função ou os limites: {e}")
+# 1. Inputs
+raw_input_def = st.text_input("Função (use 'x'):", value="sin(x)", key="func_def")
+lower_limit, expr_lower = st.number_input("Limite inferior:", "0")
+upper_limit, expr_upper = st.number_input("Limite superior:", "1")
 
+# 2. Lógica Principal
+if lower_limit is not None and upper_limit is not None:
+    try:
+        # Processa a função principal
+        func_def = sp.sympify(raw_input_def, locals={**meus_simbolos, **_clash})
+        
+        # PREPARA PARA O CALCULO 
+        f_lamb = sp.lambdify(sp.symbols('x'), func_def, modules=['numpy'])
+        
+        # CALCULA 
+        resultado, erro = quad(f_lamb, lower_limit, upper_limit)
 
-col1, col2 = st.columns(2)
+        # 3. EXIBIÇÃO DA INTEGRAL
+        st.write("### Resultado:")
+        st.latex(rf"\int_{{{sp.latex(expr_lower)}}}^{{{sp.latex(expr_upper)}}} {sp.latex(func_def)} \, dx \approx {resultado:.4f}")
 
-# Quero adicionar um gráfico mostrando a área sob a curva da função integrada entre os limites definidos
-with col1:
-    st.subheader("Visualização da Área Sob a Curva")
-    x_vals = np.linspace(lower - 1, upper + 1, 400)
-    y_vals = [sp.lambdify(sp.symbols('x'), func_def)(x) for x in x_vals]
-    fig, ax = plt.subplots()
-    ax.plot(x_vals, y_vals, label=f'f(x) = {func_def}')
-    ax.fill_between(x_vals, y_vals, where=(x_vals >= lower) & (x_vals <= upper), color='lightblue', alpha=0.5)
-    ax.axhline(0, color='black', lw=0.5)
-    ax.axvline(0, color='black', lw=0.5)
-    ax.set_title("Área Sob a Curva")
-    ax.legend()
-    st.pyplot(fig)
+        # 4. EXIBIÇÃO DO GRÁFICO (Agora protegido dentro do Try!)
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("Visualização da Área Sob a Curva")
+            
+            # Eixo X com margem de respiro de 1 unidade para os lados
+            x_vals = np.linspace(lower_limit - 1, upper_limit + 1, 400)
+            
+            # Eixo Y otimizado (sem list comprehension lenta)
+            y_vals = f_lamb(x_vals)
+            
+            # Prevenção de erro caso a função seja uma constante (ex: f(x) = 2)
+            if np.isscalar(y_vals):
+                y_vals = np.full_like(x_vals, y_vals)
+                
+            fig, ax = plt.subplots()
+            ax.plot(x_vals, y_vals, label=f'f(x) = {func_def}')
+            
+            # Pinta a área exata da integral
+            ax.fill_between(x_vals, y_vals, where=(x_vals >= lower_limit) & (x_vals <= upper_limit), color='lightblue', alpha=0.5)
+            
+            # Linhas dos eixos (cruz no zero)
+            ax.axhline(0, color='black', lw=0.5)
+            ax.axvline(0, color='black', lw=0.5)
+            
+            ax.set_title("Área Sob a Curva")
+            ax.legend()
+            st.pyplot(fig)
+
+    except Exception as e:
+        st.error(f"Erro no cálculo ou no gráfico: {e}")
 
 st.divider()
 
