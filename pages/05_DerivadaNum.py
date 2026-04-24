@@ -29,14 +29,9 @@ def app():
         
         st.divider()
         st.markdown("📐 **Trigonometria**")
-        unidade = st.radio(
-            "Unidade dos valores inseridos:", 
-            ("Padrão: Radianos", "Graus")
-        )
+        unidade = st.radio("Unidade:", ("Padrão: Radianos", "Graus"))
         
-        # Para 2ª derivada, h muito pequeno (1e-8) pode gerar ruído numérico. 
-        # 1e-5 é o ideal para equilibrar truncamento e arredondamento.
-        h = 1e-5 
+        h = 1e-5 # Passo estável para 1ª e 2ª ordem
         
         st.divider()
         calc_segunda = st.checkbox("Calcular 2ª Derivada?", value=False)
@@ -71,64 +66,66 @@ def app():
             st.error("Erro: Fy = 0 (Tangente Vertical).")
             return
 
-        dy_dx = -Fx / Fy
+        dy_dx_num = -Fx / Fy
+
+        # --- PROVA REAL ANALÍTICA (1ª ORDEM) ---
+        df_dx_s = sp.diff(f_simbolica, v1_sym)
+        df_dy_s = sp.diff(f_simbolica, v2_sym)
+        dy_dx_analitica_expr = -df_dx_s / df_dy_s
+        val_exato_1 = float(dy_dx_analitica_expr.subs({v1_sym: v1_calc, v2_sym: v2_calc}))
+        erro_1 = abs((dy_dx_num - val_exato_1) / val_exato_1 * 100) if val_exato_1 != 0 else 0
 
         # --- EXIBIÇÃO 1ª ORDEM ---
         l_ind = formatar_latex(var_indep)
         l_dep = formatar_latex(var_dep)
         
         st.subheader("🎯 Resultados da 1ª Derivada")
-        st.latex(rf"\frac{{d {l_dep}}}{{d {l_ind}}} \approx {dy_dx:.8f}")
-
-        # Validação Analítica 1ª Ordem
-        df_dx_s = sp.diff(f_simbolica, v1_sym)
-        df_dy_s = sp.diff(f_simbolica, v2_sym)
-        dy_dx_analitica_expr = -df_dx_s / df_dy_s
-        val_exato_1 = float(dy_dx_analitica_expr.subs({v1_sym: v1_calc, v2_sym: v2_calc}))
-        erro_1 = abs((dy_dx - val_exato_1) / val_exato_1 * 100) if val_exato_1 != 0 else 0
+        st.latex(rf"\frac{{d {l_dep}}}{{d {l_ind}}} \approx {dy_dx_num:.8f}")
 
         c1, c2 = st.columns(2)
         c1.metric("Valor Exato (SymPy)", f"{val_exato_1:.8f}")
         c2.metric("Erro Relativo", f"{erro_1:.2e} %")
 
-        # --- CÁLCULO NUMÉRICO E VALIDAÇÃO DA 2ª ORDEM ---
+        with st.expander("🔍 Detalhes Técnicos da 1ª Derivada"):
+            st.write("**Fórmula Simbólica (Analítica):**")
+            st.latex(sp.latex(dy_dx_analitica_expr))
+            st.write(f"**Fx (Numérico):** {Fx:.6f} | **Fy (Numérico):** {Fy:.6f}")
+
+        # --- CÁLCULO E VALIDAÇÃO DA 2ª ORDEM ---
         if calc_segunda:
             st.divider()
             st.subheader("🎯 Resultados da 2ª Derivada")
 
-            # Numérico
+            # Numérico (Diferenças Centrais)
             Fxx = (F(v1_calc + h, v2_calc) - 2*f0 + F(v1_calc - h, v2_calc)) / (h**2)
             Fyy = (F(v1_calc, v2_calc + h) - 2*f0 + F(v1_calc, v2_calc - h)) / (h**2)
             Fxy = (F(v1_calc+h, v2_calc+h) - F(v1_calc+h, v2_calc-h) - 
                    F(v1_calc-h, v2_calc+h) + F(v1_calc-h, v2_calc-h)) / (4 * h**2)
             
-            d2y_dx2 = -(Fxx * Fy**2 - 2 * Fxy * Fx * Fy + Fyy * Fx**2) / (Fy**3)
-            st.latex(rf"\frac{{d^2 {l_dep}}}{{d {l_ind}^2}} \approx {d2y_dx2:.8f}")
+            d2y_dx2_num = -(Fxx * Fy**2 - 2 * Fxy * Fx * Fy + Fyy * Fx**2) / (Fy**3)
+            st.latex(rf"\frac{{d^2 {l_dep}}}{{d {l_ind}^2}} \approx {d2y_dx2_num:.8f}")
 
             # Analítico (Prova Real)
-            # Calculamos as parciais de segunda ordem simbolicamente
             Fxx_s = sp.diff(f_simbolica, v1_sym, 2)
             Fyy_s = sp.diff(f_simbolica, v2_sym, 2)
             Fxy_s = sp.diff(f_simbolica, v1_sym, v2_sym)
             
-            # Montamos a fórmula da segunda derivada implícita
             d2y_dx2_analitica_expr = -(Fxx_s * df_dy_s**2 - 2 * Fxy_s * df_dx_s * df_dy_s + Fyy_s * df_dx_s**2) / (df_dy_s**3)
-            
             val_exato_2 = float(d2y_dx2_analitica_expr.subs({v1_sym: v1_calc, v2_sym: v2_calc}))
-            erro_2 = abs((d2y_dx2 - val_exato_2) / val_exato_2 * 100) if val_exato_2 != 0 else 0
+            erro_2 = abs((d2y_dx2_num - val_exato_2) / val_exato_2 * 100) if val_exato_2 != 0 else 0
 
             c3, c4 = st.columns(2)
             c3.metric("Valor Exato (SymPy)", f"{val_exato_2:.8f}")
             c4.metric("Erro Relativo", f"{erro_2:.2e} %")
 
             with st.expander("🔍 Detalhes Técnicos da 2ª Derivada"):
-                st.write("**Fórmula Simbólica:**")
+                st.write("**Fórmula Simbólica (Analítica):**")
                 st.latex(sp.latex(d2y_dx2_analitica_expr))
-                st.write(f"**Passo h:** {h}")
-                st.info("Nota: O erro em 2ª ordem costuma ser maior que em 1ª devido ao acúmulo de arredondamentos.")
+                st.write(f"**Fxx:** {Fxx:.4f} | **Fyy:** {Fyy:.4f} | **Fxy:** {Fxy:.4f}")
 
     except Exception as e:
-        st.error(f"Erro no processamento: {e}")
+        st.error(f"Erro no processamento: verifique a equacao original.")
+        print(f"Erro: {e}")
 
 if __name__ == "__main__":
     app()
