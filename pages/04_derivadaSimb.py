@@ -56,8 +56,7 @@ def calculadora():
     st.title("⚙️ Calculadora de Derivadas Profissional")
     st.markdown("---") 
     st.divider()
-    with st.expander:
-        st.warning("⚠️ Derivadas de Ordem superior podem ser muito complexas e travar o site, tome cuidado.")
+    
 
     # --- INTERFACE LATERAL ---
     st.sidebar.header("🔧 Configurações")
@@ -89,6 +88,7 @@ def calculadora():
         ["Leve (Rápido)", "Médio (Cancel)", "Profundo (Lento)"],
         index=1
     )
+    st.warning("⚠️ Cuidado, Derivadas de Ordem superior podem travar o site por serem muito complexas")
 
     # --- PROCESSAMENTO ---
     try:
