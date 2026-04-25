@@ -54,7 +54,10 @@ def calculadora():
     todos_simbolos = latino + gregas + [g.capitalize() for g in gregas]
 
     st.title("⚙️ Calculadora de Derivadas Profissional")
-    st.markdown("---")
+    st.markdown("---") 
+    st.divider()
+    with st.expander:
+        st.warning("⚠️ Derivadas de Ordem superior podem ser muito complexas e travar o site, tome cuidado.")
 
     # --- INTERFACE LATERAL ---
     st.sidebar.header("🔧 Configurações")
@@ -170,6 +173,9 @@ def calculadora():
     except Exception as erro:
         st.error(f"❌ Erro: {erro}")
         st.info("Dica: Use '*' para multiplicações. Ex: 6*tan(theta).")
+        
 
 if __name__ == "__main__":
     calculadora()
+
+
