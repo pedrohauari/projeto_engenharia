@@ -7,7 +7,7 @@ ureg = UnitRegistry()
 
 
 # Configuração da página
-st.set_page_config(page_title="Conversor Pró - Pint", page_icon="📏", layout="centered")
+st.set_page_config(page_title="Conversor de Unidades", page_icon="📏", layout="centered")
 st.title("📏 Conversor de Unidades Inteligente")
 st.markdown("Alimentado pela biblioteca **Pint** para precisão científica.")
 
@@ -201,4 +201,4 @@ except Exception as e:
 
 st.divider()
 
-# print(dir(ureg))  -> Útil para explorar as unidades disponíveis no Pint!
+# print(dir(ureg))  -> Útil para explorar as unidades disponíveis no Pint
