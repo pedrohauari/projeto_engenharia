@@ -70,9 +70,9 @@ def app():
             f_simbolica = sp.sympify(texto_limpo, locals=contexto)
             modo_implicito = False
 
-        # --- GESTÃO DE VARIÁVEIS ---
+        # --- GESTÃO DE VARIÁVEIS  ---
         todos_na_func = f_simbolica.free_symbols
-        # Candidatos são tudo que não é a variável independente ou constantes matemáticas
+        # Candidatos são símbolos que não são a variável independente nem constantes matemáticas
         candidatos = [s for s in todos_na_func if str(s) != var_indep_nome and str(s) not in ['e', 'pi', 'E']]
 
         var_dep_sym = None
@@ -80,31 +80,38 @@ def app():
 
         if candidatos:
             st.info("🔍 **Análise de Parâmetros**")
-            if len(candidatos) > 1 and modo_implicito:
-                var_dep_nome = st.selectbox("Qual destas é a variável DEPENDENTE?", [str(c) for c in candidatos])
-                var_dep_sym = sp.Symbol(var_dep_nome)
-            elif candidatos:
-                var_dep_sym = candidatos[0]
-                st.write(f"Variável dependente detectada: **{var_dep_sym}**")
-
-            # O restante vira constante numérica
+            
+            # SÓ procuramos variável dependente se houver um "=" na entrada
+            if modo_implicito:
+                if len(candidatos) > 1:
+                    var_dep_nome = st.selectbox("Qual destas é a variável DEPENDENTE?", [str(c) for c in candidatos])
+                    var_dep_sym = sp.Symbol(var_dep_nome)
+                else:
+                    var_dep_sym = candidatos[0]
+                    st.write(f"Variável dependente detectada: **{var_dep_sym}**")
+            
+            # Tudo que NÃO for a variável dependente (ou tudo, se for explícito) vira constante
             outros_params = [c for c in candidatos if str(c) != str(var_dep_sym)]
+            
             if outros_params:
                 with st.expander("📝 Valores das Constantes Detectadas", expanded=True):
                     cols = st.columns(len(outros_params))
                     for i, p in enumerate(outros_params):
-                        dict_params[p] = cols[i].number_input(f"Valor de {p}:", value=1.0)
+                        dict_params[p] = cols[i].number_input(f"Valor de {p}:", value=1.0, key=f"const_{p}")
 
+            # Se for implícito, precisamos do valor fixo da variável dependente no ponto
             if modo_implicito and var_dep_sym:
                 v2_val_fixo = st.sidebar.number_input(f"Valor de {var_dep_sym} no ponto:", value=1.0)
 
-        # --- PREPARAÇÃO PARA CÁLCULO (RESOLVE ERRO DE UFUNC) ---
-        # Substituímos as constantes simbólicas por valores numéricos ANTES de transformar em função Python
+        # --- PREPARAÇÃO PARA CÁLCULO ---
+        # Substituímos as constantes pelos valores numéricos ANTES do lambdify
         f_num_preparada = f_simbolica.subs(dict_params)
         
         if modo_implicito and var_dep_sym:
+            # A função numérica precisará de (independente, dependente)
             F_num = sp.lambdify((v1_sym, var_dep_sym), f_num_preparada, modules=['numpy', 'math'])
         else:
+            # A função numérica precisará apenas da independente
             F_num = sp.lambdify(v1_sym, f_num_preparada, modules=['numpy', 'math'])
 
         # --- CÁLCULO DAS DERIVADAS ---
