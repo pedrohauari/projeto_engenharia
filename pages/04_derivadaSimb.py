@@ -1,5 +1,6 @@
 import streamlit as st
 import sympy as sp
+import numpy as np
 import string
 
 # --- FUNÇÃO DE LIMPEZA VISUAL (V2: COM SUPORTE A GREGO) ---
@@ -55,7 +56,7 @@ def calculadora():
 
     st.title("⚙️ Calculadora de Derivadas Profissional")
     st.markdown("---") 
-    st.divider()
+    
     
 
     # --- INTERFACE LATERAL ---
@@ -88,7 +89,7 @@ def calculadora():
         ["Leve (Rápido)", "Médio (Cancel)", "Profundo (Lento)"],
         index=1
     )
-    st.warning("⚠️ Cuidado, Derivadas de Ordem superior podem travar o site por serem muito complexas")
+    
 
     # --- PROCESSAMENTO ---
     try:

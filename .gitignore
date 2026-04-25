@@ -1,8 +1,7 @@
-pages/Calculadora/
-pages/derivada_simbolica/
-pages/derivada_numerica/
-pages/integral_simbolica/
+MEU_PORTAL_MATEMATICO/Calculadora
+MEU_PORTAL_MATEMATICO/Derivada2
+MEU_PORTAL_MATEMATICO/DerivadaNumerica
+MEU_PORTAL_MATEMATICO/Calculadora/Integral_numerica
 __pycache__/
-pages/integral_numerica/
 .venv/
 .DS_Store
