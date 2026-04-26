@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sp 
 
 # Configuração da página
 st.set_page_config(page_title="Analisador de Polinômios Gerais", layout="wide")
@@ -23,8 +24,17 @@ try:
     raizes = np.roots(coefs)
     # grau de um polinomio n é  quantidade(coeficientes) - 1 
     grau = len(coefs) - 1
+    # Equacao simbólica com o sympy
+    z = sp.symbols('z')
+    equacao_sym = 0
+    for i, c in enumerate(coefs):
+        equacao_sym += c * z**(grau - i)
 
-    st.subheader(f"Análise do Polinômio de Grau {grau}")
+    st.subheader("Equacao Interpretada:")
+    st.latex(f"{sp.latex(equacao_sym)} = 0")
+    st.divider() 
+
+    st.subheader(f"Distribuição das {grau} Raízes no Plano Complexo")
 
     # --- Plotagem ---
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -36,6 +46,8 @@ try:
     # Desenhar eixos
     ax.axhline(0, color='black', linewidth=1)
     ax.axvline(0, color='black', linewidth=1)
+    ax.set_xlabel("Eixo Real (Re)", fontsize = 12)
+    ax.set_ylabel("Eixo Imaginário (Im)", fontsize = 12)
     
     # Plotar as raízes
     ax.scatter(reais, imags, color='magenta', s=100, edgecolors='black', zorder=5)
