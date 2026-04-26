@@ -21,17 +21,18 @@ n = st.sidebar.number_input("Ordem da Raiz (n)", min_value=2, max_value=100, val
 
 # --- Processamento Matemático ---
 
-# 1. Cálculo do Módulo e Argumento
-r = sqrt(a**2 + b**2)   # Módulo do numero complexo
-theta = atan2(b, a) # Argumento, Resolve automaticamente os casos de a=0 e quadrantes com atan2
+# 1. Cálculo do Módulo e Argumento (numérico para o gráfico)
+r = sqrt(a**2 + b**2)   
+theta = atan2(b, a) 
 
 # 2. Representação em LaTeX usando SymPy
-z_sym, w_sym = sp.symbols('z w')
+z_sym = sp.symbols('z')
 forma_algebrica = a + b*sp.I
-# Criando a representação polar simbólica para o LaTeX
+
+# Simplificar o módulo e o ângulo simbolicamente
 r_sym = sp.simplify(sp.sqrt(a**2 + b**2))
-# Simplificar o ângulo para frações de pi se possível
-theta_sym = sp.Rational(sp.atan2(b, a)) 
+# AQUI ESTAVA O ERRO: Removi o sp.Rational. O sp.atan2 já faz o trabalho sujo.
+theta_sym = sp.atan2(b, a) 
 
 st.subheader("1. Representação da Equação")
 col1, col2 = st.columns(2)
@@ -42,8 +43,8 @@ with col1:
 
 with col2:
     st.write("**Forma Polar (w):**")
-    # Mostrando r * (cos(theta) + i*sin(theta))
-    st.latex(f"w = {r:.4f} \cdot (\cos({theta:.4f}) + i \cdot \sin({theta:.4f}))")
+    # Melhorei aqui para usar o theta_sym (com pi) no LaTeX!
+    st.latex(f"w = {sp.latex(r_sym)} \cdot (\cos({sp.latex(theta_sym)}) + i \cdot \sin({sp.latex(theta_sym)}))")
 
 # 3. Cálculo das Raízes (De Moivre)
 raizes = []
@@ -60,39 +61,39 @@ st.subheader(f"2. Geometria das {n} Raízes")
 
 fig, ax = plt.subplots(figsize=(8, 8))
 
-# Extrair coordenadas X e Y
 x_coords = [p[0] for p in raizes]
 y_coords = [p[1] for p in raizes]
 
-# Adicionar a primeira raiz ao final para fechar o polígono
 x_plot = x_coords + [x_coords[0]]
 y_plot = y_coords + [y_coords[0]]
 
-# Desenhar o círculo circunscrito
 circulo = plt.Circle((0, 0), raio_raiz, color='gray', fill=False, linestyle='--', alpha=0.5)
 ax.add_artist(circulo)
 
-# Plotar os vértices (Pontos Vermelhos)
 ax.scatter(x_coords, y_coords, color='red', s=50, zorder=5, label='Raízes (Vértices)')
-
-# Desenhar as arestas do polígono
 ax.plot(x_plot, y_plot, color='blue', linewidth=2, alpha=0.8, label=f'Polígono (n={n})')
 
-# Configurações do gráfico
 limite = raio_raiz * 1.3
 ax.set_xlim(-limite, limite)
 ax.set_ylim(-limite, limite)
 ax.axhline(0, color='black', linewidth=1)
 ax.axvline(0, color='black', linewidth=1)
-ax.set_aspect('equal') # Importante para o polígono não ficar deformado
+ax.set_aspect('equal') 
 ax.grid(True, linestyle=':', alpha=0.6)
 ax.set_xlabel("Eixo Real (Re)")
 ax.set_ylabel("Eixo Imaginário (Im)")
 ax.legend()
 
+unit_circle = plt.Circle((0, 0), 1.0, color='green', fill=False, linestyle=':', alpha=0.3)
+ax.add_artist(unit_circle)
+
+for x, y in raizes:
+    angulo_deg = np.degrees(atan2(y, x))
+    if angulo_deg < 0: angulo_deg += 360
+    ax.annotate(f"{angulo_deg:.1f}°", (x, y), textcoords="offset points", xytext=(5,5), fontsize=8)
+
 st.pyplot(fig)
 
-# --- Lista das Raízes ---
 with st.expander("Ver valores numéricos das raízes"):
     for i, (re, im) in enumerate(raizes):
         st.write(f"Raiz {i}: {re:.4f} + {im:.4f}j")
