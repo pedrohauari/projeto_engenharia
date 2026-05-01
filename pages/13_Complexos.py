@@ -43,6 +43,10 @@ if equacao_texto:
                     var_principal = s
                     break
             
+            # --- EXIBIÇÃO BONITA (Antes da substituição) ---
+            st.subheader("📝 Expressão Simbólica:")
+            st.latex(sp.latex(equacao_obj) + " = 0")
+
             st.sidebar.divider()
             st.sidebar.header("⚙️ Parâmetros Detectados")
             
